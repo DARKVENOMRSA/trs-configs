@@ -1,0 +1,28 @@
+name: Admin Upload
+
+on:
+  workflow_dispatch:
+    inputs:
+      filename:
+        description: "File name"
+        required: true
+      content:
+        description: "Base64 content"
+        required: true
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Decode file
+        run: |
+          echo "${{ github.event.inputs.content }}" | base64 -d > "${{ github.event.inputs.filename }}"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: "${{ github.event.inputs.filename }}"
+          tag_name: "trs-${{ github.run_id }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
