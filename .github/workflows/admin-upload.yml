@@ -1,28 +1,21 @@
-name: Admin Upload
+name: TRS Upload
 
 on:
-  workflow_dispatch:
-    inputs:
-      filename:
-        description: "File name"
-        required: true
-      content:
-        description: "Base64 content"
-        required: true
+  repository_dispatch:
+    types: [trs_upload]
 
 jobs:
   upload:
     runs-on: ubuntu-latest
-
     steps:
       - name: Decode file
         run: |
-          echo "${{ github.event.inputs.content }}" | base64 -d > "${{ github.event.inputs.filename }}"
+          echo "${{ github.event.client_payload.content }}" | base64 -d > "${{ github.event.client_payload.filename }}"
 
-      - name: Create Release
+      - name: Publish
         uses: softprops/action-gh-release@v1
         with:
-          files: "${{ github.event.inputs.filename }}"
-          tag_name: "trs-${{ github.run_id }}"
+          tag_name: "${{ github.event.client_payload.release }}"
+          files: "${{ github.event.client_payload.filename }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
